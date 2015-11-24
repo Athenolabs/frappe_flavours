@@ -52,6 +52,12 @@ frappe.ui.form.on("Custom Field Template", "fieldtype", function(frm, cdt, cdn){
     }
 });
 
+frappe.ui.form.on("Custom Field Template Position", "form_render", function(frm, cdt, cdn){
+    var field = frappe.utils.filter_dict(frm.fields_dict.positions.grid.grid_rows_by_docname[cdn].docfields, {'fieldname': 'dt'})[0];
+    field.read_only = !frm.doc.__islocal;
+    frm.fields_dict.positions.grid.grid_rows_by_docname[cdn].fields_dict.dt.refresh();
+});
+
 frappe.ui.form.on("Custom Field Template Position", "dt", function(frm, cdt, cdn){
     var d = locals[cdt][cdn];
 

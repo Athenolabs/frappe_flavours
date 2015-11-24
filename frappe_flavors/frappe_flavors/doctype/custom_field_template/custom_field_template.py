@@ -10,12 +10,13 @@ from frappe import _
 from frappe.model.document import Document
 
 class CustomFieldTemplate(Document):
+	
 	def autoname(self):
 		self.set_fieldname()
-		self.name = self.fieldname
+		self.name = "{}-{}".format(self.module, self.fieldname)
 
 	def validate(self):
-		self.validate_table_has_rows(self, 'positions')
+		self.validate_table_has_rows('positions')
 
 	def set_fieldname(self):
 		if not self.fieldname:
@@ -28,20 +29,25 @@ class CustomFieldTemplate(Document):
 	def on_update(self):
 		self.create_custom_fields()
 
-
 	def create_custom_fields(self):
 		template = self.as_dict()
 		for d in self.positions:
 			cf = d.as_dict()
 			cf.update(template)
-			df['fieldname'] = make_fieldname(d.dt, self.fieldname)
+			for f in ['doctype', 'name']:
+				cf.pop(f)
+			cf.update({
+				'doctype': "Custom Field",
+				'fieldname': make_fieldname(d.dt, self.fieldname) 
+			})
+
 			ref = create_or_update_custom_field(d.dt, cf)
-			frappe.db.set_value("Custom Field Template Position", d.name, "fieldname", df["fieldname"])
+			frappe.db.set_value("Custom Field Template Position", d.name, "fieldname", cf["fieldname"])
 			frappe.db.set_value("Custom Field Template Position", d.name, "custom_field", ref)
 
 
 def make_fieldname(dt, fieldname):
-	return filter(lambda x: x.is_digit() or x.isalpha() or '_',
+	return filter(lambda x: x.isdigit() or x.isalpha() or '_',
 		cstr(' '.join([dt, fieldname])).lower().replace(' ', '_'))
 
 
@@ -52,10 +58,10 @@ def get_fields_label(doctype=None):
 def create_or_update_custom_field(doctype, df):
 	cf = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": df.fieldname})
 	if not cf:
-		doc = frappe.get_doc(**df)
-		doc.insert()
+		doc = frappe.new_doc("Custom Field")
 	else:
 		doc = frappe.get_doc("Custom Field", cf["name"])
-		doc.update(**df)
-		doc.save()
+	
+	doc.update(df)
+	doc.save()
 	return doc.name
