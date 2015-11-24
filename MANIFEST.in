@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include frappe_flavors *.css
+recursive-include frappe_flavors *.csv
+recursive-include frappe_flavors *.html
+recursive-include frappe_flavors *.ico
+recursive-include frappe_flavors *.js
+recursive-include frappe_flavors *.json
+recursive-include frappe_flavors *.md
+recursive-include frappe_flavors *.png
+recursive-include frappe_flavors *.py
+recursive-include frappe_flavors *.svg
+recursive-include frappe_flavors *.txt
+recursive-exclude frappe_flavors *.pyc
